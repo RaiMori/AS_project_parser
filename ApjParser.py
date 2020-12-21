@@ -1,5 +1,5 @@
 from os import path
-import lxml
+from lxml import etree
 
 class ApjParser:
     
@@ -16,7 +16,7 @@ class ApjParser:
             raise ValueError('Unable to find apj file. Please check path to project')
 
     def _check_apj_path(self):
-        raise NotImplementedError()
+        return path.isfile(self.apj_path)
 
     def _read_apj_file(self) -> str:
         with open(self.apj_path, 'r') as f:
@@ -29,6 +29,9 @@ class ApjParser:
         raise NotImplementedError()
 
     def parse(self):
+        raise NotImplementedError()
+
+    def get_as_verison(self):
         raise NotImplementedError()
 
     def get_technology_packages(self):
