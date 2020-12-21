@@ -1,18 +1,31 @@
 from os import path
+import lxml
 
 class ApjParser:
     
-    def __init__(self, project_folder_path, apj_name):
+    def __init__(self, project_folder_path, apj_name=None):
         self.path = project_folder_path
-        self.apj_name = apj_name
+        if apj_name:
+            self.apj_name = apj_name
+        else:
+            self.apj_name = self._find_apj_file(project_folder_path)
         self.apj_path = path.join(project_folder_path, apj_name)
-        self.project_version = ''
-        raise NotImplementedError()
+        if self._check_apj_path():
+            pass
+        else:
+            raise ValueError('Unable to find apj file. Please check path to project')
 
     def _check_apj_path(self):
         raise NotImplementedError()
 
-    def _read_apj_file(self):
+    def _read_apj_file(self) -> str:
+        with open(self.apj_path, 'r') as f:
+            content = f.read()
+
+        return content
+
+    @staticmethod
+    def _find_apj_file(project_path):
         raise NotImplementedError()
 
     def parse(self):
@@ -39,3 +52,8 @@ class ApjParser:
     def get_iec_parameters(self):
         raise NotImplementedError()
 
+
+if __name__=="__main__":
+    prj_path = ''
+    apj_name = 'PLC_Framework.apj'
+    apj_parser = ApjParser(prj_path, apj_name)
