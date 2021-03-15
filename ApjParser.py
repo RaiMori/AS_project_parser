@@ -1,3 +1,4 @@
+import shutil
 from os import path
 from lxml import etree
 
