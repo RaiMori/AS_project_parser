@@ -41,7 +41,7 @@ class AS_Build:
     """ Build BR Automation Studio project """
     def __init__(self, as_path, apj_path, configuration, rebuild=True, generate_ruc=True, simulation=True):
         self.as_path = as_path
-        self.apj_path = apj_path
+        self.apj_path = self._check_as_prj_path(apj_path)
         self.config = configuration
         self.rebuild = rebuild
         self.generate_ruc = generate_ruc
@@ -73,13 +73,23 @@ class AS_Build:
 
     @staticmethod
     def parse_log(build_log):
-        pass
+        # return dict
+        # errors_num, warnings_num, errors, warnings, info
+        raise NotImplementedError()
 
     def _get_prj_path(self):
         raise NotImplementedError()
 
+    @staticmethod
+    def _check_as_prj_path(path):
+        if not Path(path).is_file():
+            raise FileNotFoundError("AS project file(.apj) not found. Check path to AS project")
+        return path
+
     def _get_as_builder_path(self):
         as_builder_path = Path(self.as_path).joinpath("Bin-En\BR.AS.Build.exe")
+        if not as_builder_path.is_file():
+            raise FileNotFoundError("BR.AS.Build.exe doesn't exist. Check path to AS installation dir")
         return str(as_builder_path)
 
 
@@ -107,3 +117,8 @@ class RUC_Transfer:
         pass
 
     
+if __name__ == "__main__":
+    as_path = r"C:\APPL\BrAutomation\AS49"
+    prj_path = r"C:\_Git\plc-framework"
+    builder = AS_Build(as_path, prj_path, "ArSim")
+    builder.build()
