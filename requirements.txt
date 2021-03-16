@@ -1,0 +1,23 @@
+AS_Prj:
+    - get all hw configurations
+    - build configuration
+    - transfer configuration
+    - call configurations as dict/field
+    - get/set tasks in hw configuration
+    - get/set build events
+    - get/set build defines
+
+    
+    - explore all souce files
+    - add package to Logical
+    - generate doxygen documentation
+    - run static analysis
+
+    - AS debugger
+
+    - AS API server:
+        - cmd to run as build
+        - parse and display log
+        - run transfer
+
+        - debug?
