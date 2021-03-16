@@ -1,11 +1,10 @@
+import re
 from pathlib import Path
-import shutil
 import subprocess
 import lxml
 
 
 class PhysicalConfiguration:
-    
     def __init__(self, name, path):
         pass
 
@@ -37,9 +36,36 @@ class PhysicalConfiguration:
         pass
 
 
+class ASPathManager:
+
+    def __init__(self, as_path):
+        pass
+
+    def get_global_as_path(self):
+        pass
+
+    def get_as_installation_path(self):
+        pass
+
+    def get_as_version(self):
+        pass
+
+    def get_as_dot_version(self):
+        pass
+
+
 class AS_Build:
     """ Build BR Automation Studio project """
-    def __init__(self, as_path, apj_path, configuration, rebuild=True, generate_ruc=True, simulation=True):
+
+    def __init__(
+        self,
+        as_path,
+        apj_path,
+        configuration,
+        rebuild=True,
+        generate_ruc=True,
+        simulation=True,
+    ):
         self.as_path = as_path
         self.apj_path = self._check_as_prj_path(apj_path)
         self.config = configuration
@@ -49,8 +75,13 @@ class AS_Build:
 
     def build(self):
         args = self.get_argumants()
-        out = subprocess.run([self._get_as_builder_path(), *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return out
+        out = subprocess.run(
+            [self._get_as_builder_path(), *args],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        out.check_returncode()
+        return out.stdout
 
     def get_argumants(self):
         args_list = []
@@ -62,7 +93,7 @@ class AS_Build:
             args_list.append("Rebuild")
         else:
             args_list.append("Build")
-        # Build RUC Package for project transfer    
+        # Build RUC Package for project transfer
         if self.generate_ruc:
             args_list.append("-buildRUCPackage")
         # Build for simulation
@@ -83,40 +114,49 @@ class AS_Build:
     @staticmethod
     def _check_as_prj_path(path):
         if not Path(path).is_file():
-            raise FileNotFoundError("AS project file(.apj) not found. Check path to AS project")
+            raise FileNotFoundError(
+                "AS project file(.apj) not found. Check path to AS project"
+            )
         return path
 
     def _get_as_builder_path(self):
-        as_builder_path = Path(self.as_path).joinpath("Bin-En\BR.AS.Build.exe")
+        as_builder_path = Path(self.as_path).joinpath(r"Bin-En\BR.AS.Build.exe")
         if not as_builder_path.is_file():
-            raise FileNotFoundError("BR.AS.Build.exe doesn't exist. Check path to AS installation dir")
+            raise FileNotFoundError(
+                "BR.AS.Build.exe doesn't exist. Check path to AS installation dir"
+            )
         return str(as_builder_path)
 
 
-class PIL_File:
+class BuildLogParser:
+    def __init__(self, log):
+        self.log = log
 
-    def __init__(self):
-        pass
+    def parse(self):
+        results = self.get_results()
+        return results
 
-    def get_pvi_parameters(self):
-        pass
+    def _get_issue_pattern(self, issue_name):
+        raise NotImplementedError()
 
-    def generate_pil(self):
-        pass
+    def get_warnings(self):
+        raise NotImplementedError()
+
+    def get_errors(self):
+        raise NotImplementedError()
+
+    def get_results(self):
+        errors = self.get_errors()
+        warnings = self.get_warnings()
+        results = {
+            "errors_num": len(errors),
+            "warnings_num": len(warnings),
+            "errors": errors,
+            "warnings": warnings,
+        }
+        return results
 
 
-class RUC_Transfer:
-
-    def __init__(self):
-        pass
-
-    def generate_pil(self):
-        pass
-
-    def transfer(self):
-        pass
-
-    
 if __name__ == "__main__":
     as_path = r"C:\APPL\BrAutomation\AS49"
     prj_path = r"C:\_Git\plc-framework"
