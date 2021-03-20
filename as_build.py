@@ -43,10 +43,14 @@ class AS_Build:
         )
         build_proc.communicate()
         output_log = []
+        warnings = []
+        errors = []
         while True:
             stdout_line = build_proc.stdout.readline()
             if stdout_line:
                 output_log.append(stdout_line)
+                # parse line
+                # add to results
                 if print_out:
                     print(print_out)
         raise NotImplementedError()
@@ -57,8 +61,6 @@ class AS_Build:
             [self._get_as_builder_path(), *args],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            # capture_output=True,
-            shell=True,
         )
         result = self.parse_log(out.stdout.decode("utf-8"))
         if print_out:
@@ -110,6 +112,9 @@ class AS_Build:
         result = parser.parse()
         return result
 
+    def _parse_log_line(self, line):
+        raise NotImplementedError()
+
     def _get_prj_path(self):
         raise NotImplementedError()
 
@@ -138,7 +143,8 @@ class BuildLogParser:
         results = self.get_results()
         return results
 
-    def _get_issue_pattern(self, issue_name):
+    @staticmethod
+    def _get_issue_pattern(issue_name):
         return re.compile(f".*{issue_name} \\d*:.*")
 
     def get_all_warnings(self):
@@ -150,6 +156,14 @@ class BuildLogParser:
         pattern = self._get_issue_pattern("error")
         errors = re.findall(pattern, self.log)
         return errors
+
+    @staticmethod
+    def parse_line(line):
+        warnings_pattern = self._get_issue_pattern("warning")
+        error_pattern = self._get_issue_pattern("error")
+        w = re.match(warnings_pattern, line)
+        e = re.match(error_pattern, line)
+        return e, w 
 
     def get_results(self):
         errors = self.get_all_errors()
@@ -172,6 +186,7 @@ def print_build_results(result):
     print("\n--- Warnings ---")
     for w in result["warnings"]:
         print(w)
+    print("\n")
 
 
 if __name__ == "__main__":
