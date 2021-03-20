@@ -40,7 +40,7 @@ class AS_Build:
             [self._get_as_builder_path(), *args],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            )
+        )
         build_proc.communicate()
         output_log = []
         while True:
@@ -57,7 +57,7 @@ class AS_Build:
             [self._get_as_builder_path(), *args],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            #capture_output=True,
+            # capture_output=True,
             shell=True,
         )
         result = self.parse_log(out.stdout.decode("utf-8"))

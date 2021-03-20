@@ -1,7 +1,3 @@
-import re
-from pathlib import Path
-import subprocess
-import lxml
 
 
 class PhysicalConfiguration:

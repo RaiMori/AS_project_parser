@@ -1,9 +1,8 @@
-import shutil
 from os import path
 from lxml import etree
 
+
 class ApjParser:
-    
     def __init__(self, project_folder_path, apj_name=None):
         self.path = project_folder_path
         if apj_name:
@@ -14,13 +13,13 @@ class ApjParser:
         if self._check_apj_path():
             pass
         else:
-            raise ValueError('Unable to find apj file. Please check path to project')
+            raise ValueError("Unable to find apj file. Please check path to project")
 
     def _check_apj_path(self):
         return path.isfile(self.apj_path)
 
     def _read_apj_file(self) -> str:
-        with open(self.apj_path, 'r') as f:
+        with open(self.apj_path, "r") as f:
             content = f.read()
 
         return content
@@ -57,7 +56,7 @@ class ApjParser:
         raise NotImplementedError()
 
 
-if __name__=="__main__":
-    prj_path = ''
-    apj_name = 'PLC_Framework.apj'
+if __name__ == "__main__":
+    prj_path = ""
+    apj_name = "PLC_Framework.apj"
     apj_parser = ApjParser(prj_path, apj_name)
