@@ -34,7 +34,24 @@ class AS_Build:
         self.clean_diagnosis = clean_diagnosis
         self.profile = profile
 
-    def build(self):
+    def build_live(self, print_out=False):
+        args = self.get_argumants()
+        build_proc = subprocess.Popen(
+            [self._get_as_builder_path(), *args],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            )
+        build_proc.communicate()
+        output_log = []
+        while True:
+            stdout_line = build_proc.stdout.readline()
+            if stdout_line:
+                output_log.append(stdout_line)
+                if print_out:
+                    print(print_out)
+        raise NotImplementedError()
+
+    def build(self, print_out=False):
         args = self.get_argumants()
         out = subprocess.run(
             [self._get_as_builder_path(), *args],
@@ -43,8 +60,11 @@ class AS_Build:
             #capture_output=True,
             shell=True,
         )
-        #out.check_returncode()
-        return out.returncode, out.stdout, out.stderr
+        result = self.parse_log(out.stdout.decode("utf-8"))
+        if print_out:
+            print(out.stdout)
+
+        return result, out.returncode
 
     def get_argumants(self):
         args_list = []
@@ -143,11 +163,21 @@ class BuildLogParser:
         return results
 
 
+def print_build_results(result):
+    print("\n============ Result ============\n")
+    # print(f"Error(s): {result["errors_num"]}; Warnings {result["warnings_num"]}")
+    print("\n--- Errors ---")
+    for e in result["errors"]:
+        print(e)
+    print("\n--- Warnings ---")
+    for w in result["warnings"]:
+        print(w)
+
+
 if __name__ == "__main__":
-    as_path = r"C:\APPL\BrAutomation\AS49"
-    prj_path = r"C:\_Git\plc-framework\prj\PLC_Framework.apj"
+    as_path = r"C:\BrAutomation\AS49"
+    prj_path = r"C:\_projects\test-prj\Test_project.apj"
     builder = AS_Build(as_path, prj_path, "ArSim")
-    code, stdout, stderr = builder.build()
+    result, code = builder.build(print_out=True)
     print(f"Return code: {code}")
-    print(f"Stdout:==========\n{stdout}\n================")
-    print(f"\n\n\n{stderr}\n")
+    print_build_results(result)
