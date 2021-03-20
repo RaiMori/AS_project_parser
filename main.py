@@ -37,7 +37,6 @@ class PhysicalConfiguration:
 
 
 class ASPathManager:
-
     def __init__(self, as_path):
         pass
 
@@ -64,14 +63,26 @@ class AS_Build:
         configuration,
         rebuild=True,
         generate_ruc=True,
-        simulation=True,
+        force_simulation=True,
+        clean_all=False,
+        clean_temp=False,
+        clean_binary=False,
+        clean_generated=False,
+        clean_diagnosis=False,
+        profile=False,
     ):
         self.as_path = as_path
         self.apj_path = self._check_as_prj_path(apj_path)
         self.config = configuration
         self.rebuild = rebuild
         self.generate_ruc = generate_ruc
-        self.simulation = simulation
+        self.force_simulation = force_simulation
+        self.clean_all = clean_all
+        self.clean_temp = clean_temp
+        self.clean_binary = clean_binary
+        self.clean_generated = clean_generated
+        self.clean_diagnosis = clean_diagnosis
+        self.profile = profile
 
     def build(self):
         args = self.get_argumants()
@@ -87,18 +98,37 @@ class AS_Build:
         args_list = []
         args_list.append(self.apj_path)
         args_list.extend(["-c", self.config])
+
         # Build mode
         args_list.append("-buildMode")
         if self.rebuild:
             args_list.append("Rebuild")
         else:
             args_list.append("Build")
+
         # Build RUC Package for project transfer
         if self.generate_ruc:
             args_list.append("-buildRUCPackage")
+
         # Build for simulation
-        if self.simulation:
+        if self.force_simulation:
             args_list.append("-simulation")
+
+        # Cleanup options
+        if self.clean_all:
+            args_list.append("-cleanAll")
+
+        if self.clean_temp:
+            args_list.append("-clean-temporary")
+
+        if self.clean_binary:
+            args_list.append("-clean-binary")
+
+        if self.clean_diagnosis:
+            args_list.append("-clean-diagnosis")
+
+        if self.profile:
+            args_list.append("-profile")
 
         return args_list
 
