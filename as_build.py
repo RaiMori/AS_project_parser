@@ -40,9 +40,11 @@ class AS_Build:
             [self._get_as_builder_path(), *args],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            #capture_output=True,
+            shell=True,
         )
-        out.check_returncode()
-        return out.stdout
+        #out.check_returncode()
+        return out.returncode, out.stdout, out.stderr
 
     def get_argumants(self):
         args_list = []
@@ -143,6 +145,9 @@ class BuildLogParser:
 
 if __name__ == "__main__":
     as_path = r"C:\APPL\BrAutomation\AS49"
-    prj_path = r"C:\_Git\plc-framework"
+    prj_path = r"C:\_Git\plc-framework\prj\PLC_Framework.apj"
     builder = AS_Build(as_path, prj_path, "ArSim")
-    builder.build()
+    code, stdout, stderr = builder.build()
+    print(f"Return code: {code}")
+    print(f"Stdout:==========\n{stdout}\n================")
+    print(f"\n\n\n{stderr}\n")
