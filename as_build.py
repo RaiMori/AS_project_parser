@@ -86,9 +86,9 @@ class AS_Build:
 
     @staticmethod
     def parse_log(build_log):
-        # return dict
-        # errors_num, warnings_num, errors, warnings, info
-        raise NotImplementedError()
+        parser = BuildLogParser(build_log)
+        result = parser.parse()
+        return result
 
     def _get_prj_path(self):
         raise NotImplementedError()
@@ -119,21 +119,21 @@ class BuildLogParser:
         return results
 
     def _get_issue_pattern(self, issue_name):
-        return re.compile(f".*{issue_name} \\d+?:.*")
+        return re.compile(f".*{issue_name} \\d*:.*")
 
-    def get_warnings(self):
+    def get_all_warnings(self):
         pattern = self._get_issue_pattern("warning")
         warnings = re.findall(pattern, self.log)
         return warnings
 
-    def get_errors(self):
+    def get_all_errors(self):
         pattern = self._get_issue_pattern("error")
         errors = re.findall(pattern, self.log)
         return errors
 
     def get_results(self):
-        errors = self.get_errors()
-        warnings = self.get_warnings()
+        errors = self.get_all_errors()
+        warnings = self.get_all_warnings()
         results = {
             "errors_num": len(errors),
             "warnings_num": len(warnings),
