@@ -60,7 +60,7 @@ class PhysicalCfgPkgParser:
 
 
 class CPUPkgParser:
-    ns = "http://br-automation.co.at/AS/Cpu""
+    ns = "http://br-automation.co.at/AS/Cpu"
     def __init__(self, cpu_pkg_path):
         self.path = cpu_pkg_path
         self.cpu_pkg_tree = etree.parse(cpu_pkg_path)
@@ -73,17 +73,19 @@ class CPUPkgParser:
 
     @property
     def runtime_version(self):
-        return self._get_runtime_version_node().attrib["AutomationRuntime"]
+        return self._get_runtime_version_node().attrib["Version"]
 
     @runtime_version.setter
     def runtime_version(self, val):
         if isinstance(val, str):
-            self._get_runtime_version_node().attrib["AutomationRuntime"] = val
+            self._get_runtime_version_node().attrib["Version"] = val
+            self.cpu_pkg_tree.write(open(self.path, "wb"), pretty_print=True)
+            #etree.write(self.path, etree.tostring(self.cpu_pkg_tree, pretty_print=True))
         else:
             raise TypeError("Runtime version should be a string value")
 
     def _get_runtime_version_node(self):
-        return self.cpu_pkg_tree.find(".//Configuration/RuntimeVersion")
+        return self.cpu_pkg_tree.find(f".//{{{self.ns}}}Configuration/{{{self.ns}}}AutomationRuntime")
 
 
     # get/set runtime version
@@ -103,7 +105,7 @@ class CPUPkgParser:
 
 
 class _CPUPkgBuildOptions:
-
+    ns = CPUPkgParser.ns
     def __init__(self, build_options_tree: etree.ElementTree):
         self.tree = build_options_tree
 
@@ -156,7 +158,7 @@ class _CPUPkgBuildOptions:
 
 
 class _CPUPkgOnlineConfig:
-
+    ns = CPUPkgParser.ns
     def __init__(self, transfer_element):
         self.element = transfer_element
 
@@ -190,4 +192,9 @@ class _CPUPkgOnlineConfig:
 
 
 if __name__ == "__main__":
-    pass
+    cpu_pkg_path = r"C:\_projects\test-prj\Physical\ArSim\PC\Cpu.pkg"
+    cpu = CPUPkgParser(cpu_pkg_path)
+    a = _CPUPkgBuildOptions(cpu.cpu_pkg_tree)
+    r = cpu.runtime_version
+    print(r)
+    cpu.runtime_version = "C4.90"
