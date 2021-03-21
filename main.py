@@ -1,4 +1,4 @@
-
+from lxml import etree
 
 class PhysicalConfiguration:
     def __init__(self, name, path):
@@ -60,10 +60,10 @@ class PhysicalCfgPkgParser:
 
 
 class CPUPkgParser:
-
+    ns = "http://br-automation.co.at/AS/Cpu""
     def __init__(self, cpu_pkg_path):
         self.path = cpu_pkg_path
-        self.cpu_pkg_tree = None
+        self.cpu_pkg_tree = etree.parse(cpu_pkg_path)
 
     def get_option(self, options_name):
         raise NotImplementedError()
@@ -71,11 +71,19 @@ class CPUPkgParser:
     def set_option(self, options_name, value):
         raise NotImplementedError()
 
-    def get_runtime_version(self):
-        raise NotImplementedError()
+    @property
+    def runtime_version(self):
+        return self._get_runtime_version_node().attrib["AutomationRuntime"]
 
-    def set_runtime_version(self):
-        raise NotImplementedError()
+    @runtime_version.setter
+    def runtime_version(self, val):
+        if isinstance(val, str):
+            self._get_runtime_version_node().attrib["AutomationRuntime"] = val
+        else:
+            raise TypeError("Runtime version should be a string value")
+
+    def _get_runtime_version_node(self):
+        return self.cpu_pkg_tree.find(".//Configuration/RuntimeVersion")
 
 
     # get/set runtime version
@@ -96,32 +104,58 @@ class CPUPkgParser:
 
 class _CPUPkgBuildOptions:
 
-    def __init__(self, build_options_tree):
+    def __init__(self, build_options_tree: etree.ElementTree):
         self.tree = build_options_tree
 
-    def set_build_options(self):
+    @property
+    def build_options(self):
         raise NotImplementedError()
 
+    @build_options.setter
     def get_build_options(self):
         raise NotImplementedError()
 
-    def get_gcc_version(self):
+    @property
+    def gcc_version(self):
         raise NotImplementedError()
 
-    def get_pre_build_steps(self):
+    @gcc_version.setter
+    def gcc_version(self):
+        raise NotImplementedError()
+    
+    @property
+    def pre_build_steps(self):
         raise NotImplementedError()
 
-    def set_pre_build_steps(self):
+    @pre_build_steps.setter
+    def pre_build_steps(self):
         raise NotImplementedError()
 
-    def set_includes(self):
+    @property
+    def additionsl_includes(self):
         raise NotImplementedError()
 
-    def get_includes(self):
+    @additionsl_includes.setter
+    def additional_includes(self):
+        raise NotImplementedError()
+
+    def _get_gcc_ver_element(self):
+        raise NotImplementedError()
+
+    def _get_prebuild_element(self):
+        raise NotImplementedError()
+
+    def _get_postbuild_element(self):
+        raise NotImplementedError()
+
+    def _get_buildoptions_element(self):
+        raise NotImplementedError()
+
+    def _get_addincludes_element(self):
         raise NotImplementedError()
 
 
-class _CPUPkgTransfer:
+class _CPUPkgOnlineConfig:
 
     def __init__(self, transfer_element):
         self.element = transfer_element
@@ -132,17 +166,28 @@ class _CPUPkgTransfer:
     def set_parameter(self, param_name):
         raise NotImplementedError()
 
-    def get_device_parameters(self):
+    @property
+    def device_parameters(self):
         raise NotImplementedError()
 
-    def set_device_parameters(self):
+    @device_parameters.setter
+    def device_parameters(self):
         raise NotImplementedError()
 
-    def get_connection_parameters(self):
+    @property
+    def connection_parameters(self):
         raise NotImplementedError()
 
-    def set_connection_parameters(self):
+    @connection_parameters.setter
+    def connection_parameters(self):
         raise NotImplementedError()
+
+    def _get_conn_param_element(self):
+        raise NotImplementedError()
+
+    def _get_device_param_element(self):
+        raise NotImplementedError()
+
 
 if __name__ == "__main__":
     pass
