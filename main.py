@@ -107,88 +107,86 @@ class CPUPkgParser:
 class _CPUPkgBuildOptions:
     ns = CPUPkgParser.ns
     def __init__(self, build_options_tree: etree.ElementTree):
-        self.tree = build_options_tree
+        self.element = build_options_tree
 
     @property
     def build_options(self):
-        raise NotImplementedError()
+        return self.element.attrib["AnsicAdditionalBuildOptions"]
 
     @build_options.setter
-    def get_build_options(self):
-        raise NotImplementedError()
+    def get_build_options(self, value):
+        self.element.attrib["AnsicAdditionalBuildOptions"] = value
 
     @property
     def gcc_version(self):
-        raise NotImplementedError()
+        return self.element.attrib["GccVersion"]
 
     @gcc_version.setter
-    def gcc_version(self):
-        raise NotImplementedError()
+    def gcc_version(self, value):
+        self.element.attrib["GccVersion"] = value
     
     @property
     def pre_build_steps(self):
-        raise NotImplementedError()
+        return self.element.attrib["PreBuildStep"]
 
     @pre_build_steps.setter
-    def pre_build_steps(self):
-        raise NotImplementedError()
+    def pre_build_steps(self, value):
+        self.element.attrib["PreBuildStep"] = value
+
+    @property
+    def post_build_steps(self):
+        return self.element.attrib["PostBuildStep"]
+
+    @post_build_steps.setter
+    def post_build_steps(self, value):
+        self.element.attrib["PostBuildStep"] = value
 
     @property
     def additionsl_includes(self):
-        raise NotImplementedError()
+        return self.element.attrib["AnsicIncludeDirectories"]
 
     @additionsl_includes.setter
-    def additional_includes(self):
-        raise NotImplementedError()
-
-    def _get_gcc_ver_element(self):
-        raise NotImplementedError()
-
-    def _get_prebuild_element(self):
-        raise NotImplementedError()
-
-    def _get_postbuild_element(self):
-        raise NotImplementedError()
-
-    def _get_buildoptions_element(self):
-        raise NotImplementedError()
-
-    def _get_addincludes_element(self):
-        raise NotImplementedError()
+    def additional_includes(self, value):
+        self.element.attrib["AnsicIncludeDirectories"] = value
 
 
 class _CPUPkgOnlineConfig:
     ns = CPUPkgParser.ns
-    def __init__(self, transfer_element):
-        self.element = transfer_element
+    def __init__(self, online_config_element):
+        self.element = online_config_element
 
-    def get_parameter(self, param_name):
-        raise NotImplementedError()
+    @property
+    def name(self):
+        return self.element.attrib["Name"]
 
-    def set_parameter(self, param_name):
-        raise NotImplementedError()
+    @name.setter
+    def name(self, value):
+        self.element.attrib["Name"] = value
+
+    @property
+    def device_type(self):
+        return self.element.attrib["DeviceType"]
+
+    @device_type.setter
+    def device_type(self, value):
+        self.element.attrib["DeviceType"] = value
 
     @property
     def device_parameters(self):
-        raise NotImplementedError()
+        return self.element.attrib["DeviceParameters"]
 
     @device_parameters.setter
-    def device_parameters(self):
-        raise NotImplementedError()
+    def device_parameters(self, value):
+        self.element.attrib["DeviceParameters"] = value
 
     @property
     def connection_parameters(self):
-        raise NotImplementedError()
+        return self.element.attrib["ConnectionParameters"]
 
     @connection_parameters.setter
-    def connection_parameters(self):
-        raise NotImplementedError()
+    def connection_parameters(self, value):
+        self.element.attrib["ConnectionParameters"] = value
 
-    def _get_conn_param_element(self):
-        raise NotImplementedError()
-
-    def _get_device_param_element(self):
-        raise NotImplementedError()
 
 
 if __name__ == "__main__":
