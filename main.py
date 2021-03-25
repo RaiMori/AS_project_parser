@@ -64,6 +64,8 @@ class CPUPkgParser:
     def __init__(self, cpu_pkg_path):
         self.path = cpu_pkg_path
         self.cpu_pkg_tree = etree.parse(cpu_pkg_path)
+        self.build_options = _CPUPkgBuildOptions(self._get_build_options_node())
+        self.online_configuration = _CPUPkgOnlineConfig(self._get_online_config_node())
 
     def get_option(self, options_name):
         raise NotImplementedError()
@@ -86,6 +88,12 @@ class CPUPkgParser:
 
     def _get_runtime_version_node(self):
         return self.cpu_pkg_tree.find(f".//{{{self.ns}}}Configuration/{{{self.ns}}}AutomationRuntime")
+
+    def _get_build_options_node(self):
+        return self.cpu_pkg_tree.find(f".//{{{self.ns}}}Configuration/{{{self.ns}}}Build")
+
+    def _get_online_config_node(self):
+        return self.cpu_pkg_tree.find(f".//{{{self.ns}}}Configuration/{{{self.ns}}}OnlineConfiguration")
 
 
     # get/set runtime version
@@ -127,11 +135,13 @@ class _CPUPkgBuildOptions:
     
     @property
     def pre_build_steps(self):
-        return self.element.attrib["PreBuildStep"]
+        attrib = self.element.attrib["PreBuildStep"]
+        return self._str_to_params_list(attrib)
 
     @pre_build_steps.setter
     def pre_build_steps(self, value):
-        self.element.attrib["PreBuildStep"] = value
+        str_val = self._params_list_to_str(value)
+        self.element.attrib["PreBuildStep"] = str_val
 
     @property
     def post_build_steps(self):
@@ -148,6 +158,15 @@ class _CPUPkgBuildOptions:
     @additionsl_includes.setter
     def additional_includes(self, value):
         self.element.attrib["AnsicIncludeDirectories"] = value
+
+    @staticmethod
+    def _str_to_params_list(param):
+        lst = param.split()
+        return lst
+
+    @staticmethod
+    def _params_list_to_str(params_list):
+        return " ,".join(params_list)
 
 
 class _CPUPkgOnlineConfig:
@@ -173,19 +192,43 @@ class _CPUPkgOnlineConfig:
 
     @property
     def device_parameters(self):
-        return self.element.attrib["DeviceParameters"]
+        params_str = self.element.attrib["DeviceParameters"]
+        return self._param2list(params_str)
 
     @device_parameters.setter
     def device_parameters(self, value):
-        self.element.attrib["DeviceParameters"] = value
+        self.element.attrib["DeviceParameters"] = self._list_param2str(value)
 
     @property
     def connection_parameters(self):
-        return self.element.attrib["ConnectionParameters"]
+        params_str = self.element.attrib["ConnectionParameters"]
+        return self._param2list(params_str)
 
     @connection_parameters.setter
     def connection_parameters(self, value):
-        self.element.attrib["ConnectionParameters"] = value
+        self.element.attrib["ConnectionParameters"] = self._list_param2str(value)
+
+    def _param2list(self, params: str):
+        p_str_list = params.split()
+        out_params = []
+        for p in p_str_list:
+            out_params.append(self._param_str2tuple(p))
+        return out_params
+
+    def _param_str2tuple(self, param):
+        param_value_lst = param.split("=")
+        par = param_value_lst[0].replace("/", "")
+        val = param_value_lst[1]
+        return par, val
+
+    def _list_param2str(self, params):
+        lst = []
+        for p in params:
+            lst.append(self._param_tuple2str(*p))
+        return " ".join(lst)
+
+    def _param_tuple2str(self, param, val):
+        return f"/{param}={val}"
 
 
 
