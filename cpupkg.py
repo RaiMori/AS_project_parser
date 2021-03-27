@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from lxml import etree
 
@@ -30,6 +30,7 @@ class CPUPkgParser:
         self.cpu_pkg_tree = etree.parse(cpu_pkg_path)
         self.build_options = _CPUPkgBuildOptions(self._get_build_options_node())
         self.online_configuration = _CPUPkgOnlineConfig(self._get_online_config_node())
+        self.transfer = _TransferOptions(self._get_transfer_node())
 
     def get_option(self, options_name):
         raise NotImplementedError()
@@ -64,7 +65,10 @@ class CPUPkgParser:
             f".//{{{self.ns}}}Configuration/{{{self.ns}}}OnlineConfiguration"
         )
 
-    def _write_to_file(self):
+    def _get_transfer_node(self):
+        return self.cpu_pkg_tree.find(f".//{{{self.ns}}}Configuration/{{{self.ns}}}Transfer")
+
+    def _write_to_file(self) -> None:
         self.cpu_pkg_tree.write(open(self.path, "wb"), pretty_print=True)
 
     # get/set runtime version
@@ -225,7 +229,10 @@ class _CPUPkgOnlineConfig:
 
 BOOL_VALUES = [True, False]
 
-class TransferOptions:
+class _TransferOptions:
+
+    str2bool = {"True": True, "False": False}
+    bool2str = {True: "True", False: "False"}
 
     attributes = [{"name": 'AddToUserPart', "type": bool, "allowed_vals": ""},
                   {"name": 'AdditionalUserDir', "type": str, "allowed_vals": ""},
@@ -248,13 +255,31 @@ class TransferOptions:
                   ]
 
     def __init__(self, transfer_elem: etree.Element) -> None:
+        self.atrbs_dict = {a['name']:a for a in self.attributes}
+        
         self.element = transfer_elem
 
-    def _get_attrib(self):
-        pass
+    def __getattr__(self, name):
+        return self._get_attrib(name)
+
+    def __dir__(self):
+        return dir(_TransferOptions) + list(self.atrbs_dict.keys())
+
+    def _get_attrib(self, name: str) -> 'Union[str, bool]':
+        atrb = self.atrbs_dict.get(name, None)
+        if atrb:
+            value =  self._get_param_value(name)
+            if atrb["type"] == bool:
+                return self.str2bool[value]
+            else:
+                return value
 
     def _set_attrib(self, val):
         pass
+
+    def _get_param_value(self, value: str) -> str:
+        return self.element.attrib[value]
+
 
 
 if __name__ == "__main__":
