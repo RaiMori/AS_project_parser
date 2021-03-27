@@ -1,16 +1,43 @@
 from lxml import etree
-from typing import List, Dict
+from typing import List, Dict, Any
 
 
-class Task:
+class SWObject:
 
-    def __init__(self, name, source, memory, language, debugging, disable):
+    @classmethod
+    def from_element(cls, elem: etree.Element) -> 'SWObject':
+        name = elem.attrib["Name"]
+        src = elem.attrib["Source"]
+        mem = elem.attrib["Memory"]
+        lang = elem.attrib["Language"]
+        debug = elem.attrib.get("Debugging","False")
+        disable = elem.attrib.get("Disable", "False")
+
+        return SWObject(name, src, mem, lang, debug, disable)
+
+    def __init__(self, name, source, memory="UserROM", language="ANSIC", debugging="True", disable="False"):
         self.name = name
         self.source = source
         self.memory = memory
         self.language = language
         self.debugging = debugging
         self.disable = disable
+
+    def as_dict(self) -> Dict[str, Any]:
+        return dict(name=self.name,
+                    source=self.source,
+                    memory=self.memory,
+                    language=self.language,
+                    debugging=self.debugging,
+                    disable=self.disable
+                    )
+
+class TaskClass:
+
+    def __init__(self):
+        pass
+
+    
 
 
 class CpuSw:
@@ -32,14 +59,30 @@ class CpuSw:
     def add_task(self, task_class, task_name):
         pass
 
-    def get_libraries(self) -> List:
-        pass
+    def get_libraries(self, as_dict=False) -> List:
+        return self._get_swobject("libraries", as_dict=as_dict)
 
     def add_library(self) -> None:
         pass
 
-    def get_binaries(self) -> List:
-        pass
+    def get_binaries(self, as_dict=False) -> None:
+        return self._get_swobject("binaries", as_dict=as_dict)
+
+    def _get_swobject(self, otype: str, as_dict=False) -> List:
+        if otype == 'binaries':
+            get_obj = self._get_binaries_node
+        elif otype == 'libraries':
+            get_obj = self._get_libraries_node
+        elif otype == 'task_classes':
+            get_obj == self._get_task_classes_nodes
+        b_nodes = get_obj()
+        binaries_list = []
+        for i in b_nodes:
+            obj = SWObject.from_element(i)
+            if as_dict:
+                obj = obj.as_dict()
+            binaries_list.append(obj)
+        return binaries_list
 
     def add_binary(self) -> None:
         pass
@@ -50,8 +93,16 @@ class CpuSw:
     def _get_task_elem(self, task_class_elem: etree.Element) -> List:
         return task_class_elem.findall(f".//{{{self.ns}}}Task")
 
-    def _get_binaries(self) -> List:
+    def _get_binaries_node(self) -> List:
         return self.cpusw_tree.findall(f"./{{{self.ns}}}Binaries/{{{self.ns}}}BinaryObject")
 
     def _get_libraries_node(self) -> List:
         return self.cpusw_tree.findall(f"./{{{self.ns}}}Libraries/{{{self.ns}}}LibraryObject")
+
+
+if __name__ == "__main__":
+    cpusw_path = r"C:\_projects\test-prj\Physical\ArSim\PC\Cpu.sw"
+    sw = CpuSw(cpusw_path)
+    print([i for i in sw.get_binaries(as_dict=True)])
+    a = sw.get_libraries(as_dict=True)
+    print('')
