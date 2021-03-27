@@ -46,7 +46,6 @@ class CPUPkgParser:
     def runtime_version(self, val):
         if isinstance(val, str):
             self._get_runtime_version_node().attrib["Version"] = val
-            self.cpu_pkg_tree.write(open(self.path, "wb"), pretty_print=True)
         else:
             raise TypeError("Runtime version should be a string value")
 
