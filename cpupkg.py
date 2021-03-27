@@ -1,7 +1,10 @@
-from lxml import etree
 from typing import List, Tuple
 
+from lxml import etree
+
 # HW Configuration managment
+
+
 class PhysicalParser:
     """ Parse physical directory to get available HW configurations """
 
@@ -43,7 +46,6 @@ class CPUPkgParser:
         if isinstance(val, str):
             self._get_runtime_version_node().attrib["Version"] = val
             self.cpu_pkg_tree.write(open(self.path, "wb"), pretty_print=True)
-            # etree.write(self.path, etree.tostring(self.cpu_pkg_tree, pretty_print=True))
         else:
             raise TypeError("Runtime version should be a string value")
 
@@ -121,13 +123,13 @@ class _CPUPkgBuildOptions:
         self.element.attrib["PostBuildStep"] = value
 
     @property
-    def additionsl_includes(self) -> List[str]:
+    def additional_includes(self) -> List[str]:
         attrib = self.element.attrib["AnsicIncludeDirectories"]
         return self._str_to_params_list(attrib)
 
-    @additionsl_includes.setter
+    @additional_includes.setter
     def additional_includes(self, value: List[str]) -> None:
-        str_val = self._str_to_params_list(value)
+        str_val = self._params_list_to_str(value)
         self.element.attrib["AnsicIncludeDirectories"] = str_val
 
     @staticmethod
@@ -219,6 +221,40 @@ class _CPUPkgOnlineConfig:
 
     def _param_tuple2str(self, param: str, val: str) -> str:
         return f"/{param}={val}"
+
+
+BOOL_VALUES = [True, False]
+
+class TransferOptions:
+
+    attributes = [{"name": 'AddToUserPart', "type": bool, "allowed_vals": ""},
+                  {"name": 'AdditionalUserDir', "type": str, "allowed_vals": ""},
+                  {"name": 'AllowDowngrade', "type": bool, "allowed_vals": ""},
+                  {"name": 'AllowInitialTransfer', "type": bool, "allowed_vals": ""},
+                  {"name": 'AllowPartitioning', "type": bool, "allowed_vals": ""},
+                  {"name": 'ExecuteInitExitProgram', "type": bool, "allowed_vals": ""},
+                  {"name": 'ForceInitialTransfer', "type": bool, "allowed_vals": ""},
+                  {"name": 'IdentificationTypeValue', "type": str, "allowed_vals": ""},
+                  {"name": 'IgnoreVersion', "type": bool, "allowed_vals": ""},
+                  {"name": 'KeepNonVolatileMemory', "type": bool, "allowed_vals": ""},
+                  {"name": 'ModuleSystemForPip', "type": str, "allowed_vals": ""},
+                  {"name": 'PreserveVariableValues', "type": bool, "allowed_vals": ""},
+                  {"name": 'ProjectConsistent', "type": bool, "allowed_vals": ""},
+                  {"name": 'RebootDuringTransfer', "type": bool, "allowed_vals": ""},
+                  {"name": 'RunUnitTestsAfterTransfer', "type": bool, "allowed_vals": ""},
+                  {"name": 'TargetIdentificationType', "type": str, "allowed_vals": ""},
+                  {"name": 'TryToBootInRunMode', "type": bool, "allowed_vals": ""},
+                  {"name": 'UserFilesIgnoreDifference', "type": bool, "allowed_vals": ""},
+                  ]
+
+    def __init__(self, transfer_elem: etree.Element) -> None:
+        self.element = transfer_elem
+
+    def _get_attrib(self):
+        pass
+
+    def _set_attrib(self, val):
+        pass
 
 
 if __name__ == "__main__":
