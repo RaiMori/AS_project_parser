@@ -33,11 +33,30 @@ class SWObject:
                     )
 
 class TaskClass:
+    ns = "http://br-automation.co.at/AS/SwConfiguration"
+    def __init__(self, tk_element):
+        self.element = tk_element
+        self.name = self.element.attrib["Name"]
+        self.tasks = self._get_tasks()
 
-    def __init__(self):
-        pass
+    def as_dict(self):
+        tasks_list = []
+        for t in self.tasks:
+            tasks_list.append(t.as_dict())
+        return {self.name: tasks_list}
 
-    
+    def _get_tasks(self, as_dict=False):
+        tasks_elems = self.element.findall(f".//{{{self.ns}}}Task")
+        tasks = []
+        for t in tasks_elems:
+            task = SWObject.from_element(t)
+            if as_dict:
+                tasks.append(task.as_dict())
+            else:
+                tasks.append(task)
+        return tasks
+
+
 
 
 class CpuSw:
@@ -73,7 +92,7 @@ class CpuSw:
             get_obj = self._get_binaries_node
         elif otype == 'libraries':
             get_obj = self._get_libraries_node
-        elif otype == 'task_classes':
+        elif otype == 'task':
             get_obj == self._get_task_classes_nodes
         b_nodes = get_obj()
         binaries_list = []
@@ -90,7 +109,7 @@ class CpuSw:
     def _get_task_classes_nodes(self) -> List:
         return self.cpusw_tree.findall(f".//{{{self.ns}}}TaskClass")
 
-    def _get_task_elem(self, task_class_elem: etree.Element) -> List:
+    def _get_task_nodes(self, task_class_elem: etree.Element) -> List:
         return task_class_elem.findall(f".//{{{self.ns}}}Task")
 
     def _get_binaries_node(self) -> List:
