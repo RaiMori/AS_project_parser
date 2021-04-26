@@ -17,7 +17,7 @@ class GlobalASInstallation:
             raise ValueError(f"AS version {version} doesn't exist")
 
     def get_pvi_transfer(self, version):
-        pvi_transfer_path = self._get_global_pvi_dir(version) / "PVI" / "Tools" / "PVITranafer" / "PVITransfer.exe"
+        pvi_transfer_path = self._get_pvi_dir(version) / "PVI" / "Tools" / "PVITranafer" / "PVITransfer.exe"
         if pvi_transfer_path.is_file():
             return pvi_transfer_path
         else:
